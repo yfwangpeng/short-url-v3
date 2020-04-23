@@ -19,15 +19,15 @@ Mappings:
   # ranges to add more
   SubnetConfig:
     VPC:
-      CIDR: '10.0.0.0/16'
+      CIDR: '20.0.0.0/16'
     PublicOne:
-      CIDR: '10.0.0.0/24'
+      CIDR: '20.0.0.0/24'
     PublicTwo:
-      CIDR: '10.0.1.0/24'
+      CIDR: '20.0.1.0/24'
     PrivateOne:
-      CIDR: '10.0.2.0/24'
+      CIDR: '20.0.2.0/24'
     PrivateTwo:
-      CIDR: '10.0.3.0/24'
+      CIDR: '20.0.3.0/24'
 Resources:
   # VPC in which containers will be networked.
   # It has two public subnets, and two private subnets.
@@ -173,21 +173,21 @@ Resources:
   # If a container needs to access DynamoDB (coming in module 3) this
   # allows a container in the private subnet to talk to DynamoDB directly
   # without needing to go via the NAT gateway.
-  DynamoDBEndpoint:
-    Type: AWS::EC2::VPCEndpoint
-    Properties:
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Action: "*"
-            Principal: "*"
-            Resource: "*"
-      RouteTableIds:
-        - !Ref 'PrivateRouteTableOne'
-        - !Ref 'PrivateRouteTableTwo'
-      ServiceName: !Join [ "", [ "com.amazonaws.", { "Ref": "AWS::Region" }, ".dynamodb" ] ]
-      VpcId: !Ref 'VPC'
+  # DynamoDBEndpoint:
+  #   Type: AWS::EC2::VPCEndpoint
+  #   Properties:
+  #     PolicyDocument:
+  #       Version: "2012-10-17"
+  #       Statement:
+  #         - Effect: Allow
+  #           Action: "*"
+  #           Principal: "*"
+  #           Resource: "*"
+  #     RouteTableIds:
+  #       - !Ref 'PrivateRouteTableOne'
+  #       - !Ref 'PrivateRouteTableTwo'
+  #     ServiceName: !Join [ "", [ "com.amazonaws.", { "Ref": "AWS::Region" }, ".dynamodb" ] ]
+  #     VpcId: !Ref 'VPC'
 
 
 
@@ -317,10 +317,10 @@ Resources:
   # This will allow you to more simply use CodePipeline in the future should
   # you want to use the service for Pipelines that interact with different
   # AWS services than the ones used in this workshop.
-  MythicalMysfitsServiceCodePipelineServiceRole:
+  cccServiceCodePipelineServiceRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: MythicalMysfitsServiceCodePipelineServiceRole
+      RoleName: cccServiceCodePipelineServiceRole
       AssumeRolePolicyDocument:
         Statement:
         - Effect: Allow
@@ -331,7 +331,7 @@ Resources:
           - sts:AssumeRole
       Path: "/"
       Policies:
-      - PolicyName: MythicalMysfitsService-codepipeline-service-policy
+      - PolicyName: cccService-codepipeline-service-policy
         PolicyDocument:
           Statement:
           - Action:
@@ -367,10 +367,10 @@ Resources:
   # An IAM role that allows the AWS CodeBuild service to perform the actions
   # required to complete a build of our source code retrieved from CodeCommit,
   # and push the created image to ECR.
-  MythicalMysfitsServiceCodeBuildServiceRole:
+  cccServiceCodeBuildServiceRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: MythicalMysfitsServiceCodeBuildServiceRole
+      RoleName: cccServiceCodeBuildServiceRole
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -379,7 +379,7 @@ Resources:
             Service: codebuild.amazonaws.com
           Action: sts:AssumeRole
       Policies:
-      - PolicyName: "MythicalMysfitsService-CodeBuildServicePolicy"
+      - PolicyName: "cccService-CodeBuildServicePolicy"
         PolicyDocument:
           Version: "2012-10-17"
           Statement:
@@ -391,7 +391,7 @@ Resources:
             - "codecommit:Get*"
             - "codecommit:GitPull"
             Resource:
-            - Fn::Sub: arn:aws:codecommit:${AWS::Region}:${AWS::AccountId}:MythicalMysfitsServiceRepository
+            - Fn::Sub: arn:aws:codecommit:${AWS::Region}:${AWS::AccountId}:cccServiceRepository
           - Effect: "Allow"
             Action:
             - "logs:CreateLogGroup"
@@ -468,11 +468,11 @@ Outputs:
       Name: !Join [ ':', [ !Ref 'AWS::StackName', 'FargateContainerSecurityGroup' ] ]
   CodeBuildRole:
     Description: REPLACE_ME_CODEBUILD_ROLE_ARN
-    Value: !GetAtt 'MythicalMysfitsServiceCodeBuildServiceRole.Arn'
+    Value: !GetAtt 'cccServiceCodeBuildServiceRole.Arn'
     Export:
-      Name: !Join [ ':', [ !Ref 'AWS::StackName', 'MythicalMysfitsServiceCodeBuildServiceRole' ] ]
+      Name: !Join [ ':', [ !Ref 'AWS::StackName', 'cccServiceCodeBuildServiceRole' ] ]
   CodePipelineRole:
     Description: REPLACE_ME_CODEPIPELINE_ROLE_ARN
-    Value: !GetAtt 'MythicalMysfitsServiceCodePipelineServiceRole.Arn'
+    Value: !GetAtt 'cccServiceCodePipelineServiceRole.Arn'
     Export:
-      Name: !Join [ ':', [ !Ref 'AWS::StackName', 'MythicalMysfitsServiceCodePipelineServiceRole' ] ]
+      Name: !Join [ ':', [ !Ref 'AWS::StackName', 'cccServiceCodePipelineServiceRole' ] ]
