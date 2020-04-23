@@ -19,7 +19,7 @@ phases:
       - echo Build started on `date`
       - echo Building the jar
       # Go to build dir for the java project
-      - cd service
+      - cd short-url
       - mvn clean install
       # Go back to root folder
       - cd ..
